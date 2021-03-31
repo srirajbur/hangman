@@ -12,9 +12,11 @@ class Hangman
     return words.sample
   end
 
+  attr_reader :guess_word, :attempted_char, :remaining_incorrect_guesses
+
   def initialize()
     @secret_word = Hangman.random_word
-    @guess_word = Array.new(@secret_word.lenght, "_")
+    @guess_word = Array.new(@secret_word.length, "_")
     @attempted_char = []
     @remaining_incorrect_guesses = 5
   end
@@ -25,11 +27,12 @@ class Hangman
 
   def get_matching_indices(char)
     matching_indices = []
-    @secret_word.each.with_index do |letter, idx|
+    @secret_word.each_char.with_index do |letter, idx|
       if char == letter
-        indices << idx
+        matching_indices << idx
       end
     end
+    matching_indices
   end
 
   def fill_indices(char, indices)
@@ -44,8 +47,12 @@ class Hangman
       return false
     end
 
+    @attempted_char << char
+
     matches = self.get_matching_indices(char)
     self.fill_indices(char, matches)
+
+    @remaining_incorrect_guesses -= 1 if matches.empty?
   end
 
   def ask_user_for_guess
@@ -72,8 +79,12 @@ class Hangman
   end
 
   def game_over?
-    win? || lose?
-    puts @secret_word
-    return true
+    if self.win? || self.lose?
+      puts "The word is #{@secret_word}"
+      return true
+    else
+      return false
+    end
   end
+
 end
